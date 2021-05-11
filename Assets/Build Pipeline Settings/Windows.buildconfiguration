@@ -12,6 +12,11 @@
         {
             "$type": "Unity.Build.Common.OutputBuildDirectory, Unity.Build",
             "OutputDirectory": "Builds/Windows"
+        },
+        {
+            "$type": "Unity.Build.Classic.ClassicCodeStrippingOptions, Unity.Build.Classic",
+            "StripEngineCode": true,
+            "ManagedStrippingLevel": 3
         }
     ]
 }
