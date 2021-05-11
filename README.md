@@ -13,4 +13,6 @@ Notepad <--> this
 
 ## Installation:
 - Download [binary files](https://github.com/andrew-raphael-lukasik/UnityLogFileReader/releases) or compile project yourself.
-- Open `*.log` file with this apllication (**`RMB over a log file`->`OpenWith`->`select this app's executable`**)
+- Open `*.log` file with this apllication. Program uses `CommandLineArgs` so uou can do that by:
+  -  RMB over a log file->`OpenWith`->select this app's executable
+  -  dropping a `*.log` file over app's executable.
