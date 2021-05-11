@@ -1,9 +1,10 @@
 # UnityLogFileReader
-Windows app to make reading Unity *.log files easier on your eyes and brains.
+Simple windows app to make reading Unity *.log files easier on your eyes and brains.
 
-## How:
+## Features:
 - Collapses repeating messages.
 - Single mouse-click copies the given message.
+- Identical messages share color value.
 
 ## See for yourself:
 
