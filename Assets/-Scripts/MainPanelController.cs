@@ -10,16 +10,14 @@ using Regex = System.Text.RegularExpressions.Regex;
 [RequireComponent( typeof(UIDocument) )]
 public class MainPanelController : MonoBehaviour
 {
+
 	
-
-	void Awake () => InvokeRepeating( nameof(Tick) , time:0 , repeatRate: 1 );
-	void OnEnable () => Tick ();
+	void OnEnable () => BindUI();
 
 
-	void Tick ()
+	void BindUI ()
 	{
-		var uiDocument = GetComponent<UIDocument>();
-		var rootVisualElement = uiDocument.rootVisualElement;
+		var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
 		if( rootVisualElement!=null )
 		{
 			rootVisualElement.Clear();
@@ -52,7 +50,7 @@ public class MainPanelController : MonoBehaviour
 		{
 			if( IO.Path.GetExtension(argument)==".log" && IO.File.Exists(argument) )
 			{
-				rawLines = IO.File.ReadAllLines( argument );
+				rawLines = WriteSafeReadAllLines( argument );
 				break;
 			}
 		}
@@ -187,7 +185,7 @@ public class MainPanelController : MonoBehaviour
 	}
 
 
-	public string[] WriteSafeReadAllLines ( string path )
+	string[] WriteSafeReadAllLines ( string path )
 	{
 		using( var csv = new IO.FileStream( path , IO.FileMode.Open , IO.FileAccess.Read , IO.FileShare.ReadWrite ) )
 		using( var sr = new IO.StreamReader(csv) )
