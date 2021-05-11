@@ -10,51 +10,45 @@ using Regex = System.Text.RegularExpressions.Regex;
 [RequireComponent( typeof(UIDocument) )]
 public class MainPanelController : MonoBehaviour
 {
-
 	
-	void OnEnable () => BindUI();
+
+	ListView _mainView = null;
 
 
-	void BindUI ()
+	void Awake () => InvokeRepeating( nameof(Tick) , time:0 , repeatRate:Mathf.Sqrt(2) );
+	void OnEnable () => Tick();
+
+
+	void Tick ()
 	{
-		var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
-		if( rootVisualElement!=null )
+		if( _mainView!=null )
 		{
-			rootVisualElement.Clear();
-			CreateUI( rootVisualElement );
+
+		}
+		else
+		{
+			var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
+			if( rootVisualElement!=null )
+			{
+				rootVisualElement.Clear();
+				CreateUI( rootVisualElement );
+
+				_mainView = new ListView();
+
+			}
 		}
 	}
 
 
 	void CreateUI ( VisualElement rootVisualElement )
 	{
-		string[] rawLines = null;
-
-		#if UNITY_EDITOR
-		// read any example of a log file, to make build preview ui from:
-		try
+		if( LoadRawLines( out string[] rawLines ) )
 		{
-			string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
-			if( IO.Directory.Exists(logsDirectory) )
-			{
-				string[] files = IO.Directory.GetFiles(logsDirectory);
-				string path = files[Random.Range(0,files.Length)];
-				rawLines = WriteSafeReadAllLines( path );
-			}
+			var entries = RawLinesToEntries( rawLines );
+			var listView = CreateListViewForEntries( entries );
+			rootVisualElement.Add( listView );
 		}
-		catch( System.Exception ex ) { Debug.LogException(ex); }
-		#endif
-
-		// read log file:
-		foreach( string argument in System.Environment.GetCommandLineArgs() )
-		{
-			if( IO.Path.GetExtension(argument)==".log" && IO.File.Exists(argument) )
-			{
-				rawLines = WriteSafeReadAllLines( argument );
-				break;
-			}
-		}
-		if( rawLines==null )
+		else
 		{
 			rootVisualElement.Add( new Label("No log file path provided/recognised in execution arguments.") );
 			var ARGUMENTS = new ListView();
@@ -64,7 +58,11 @@ public class MainPanelController : MonoBehaviour
 				style.flexGrow = 1;
 			}
 			{
-				ARGUMENTS.itemsSource = rawLines;
+				List<string> arguemnts = new List<string>();
+				foreach( string argument in System.Environment.GetCommandLineArgs() )
+					arguemnts.Add( argument );
+
+				ARGUMENTS.itemsSource = arguemnts;
 				ARGUMENTS.itemHeight = 20;
 				ARGUMENTS.makeItem = () => new Label();
 				ARGUMENTS.bindItem = (ve,i) => ((Label)ve).text = (string) ARGUMENTS.itemsSource[i];
@@ -72,61 +70,11 @@ public class MainPanelController : MonoBehaviour
 			rootVisualElement.Add( ARGUMENTS );
 			return;
 		}
+	}
 
-		(string text,int count)[] entries = null;
-		if( rawLines!=null )
-		{
-			List<string> list = new List<string>();
-			var sb = new System.Text.StringBuilder();
-			foreach( string line in rawLines )
-			{
-				if( !string.IsNullOrEmpty(line) )
-				{
-					if( line[0]!='[' )
-						sb.AppendLine( line );
-					else
-					{
-						if( list.Count!=0 )
-							list[list.Count-1] += line;
-					}
-				}
-				else if( sb.Length!=0 )
-				{
-					list.Add( sb.ToString() );
-					sb.Clear();
-				}
-			}
-			
-			List<(string text,int count)> shorterList = new List<(string,int)>( capacity:list.Count );
-			if( list.Count!=0 )
-			{
-				string current = null;
-				int currentHash = -1;
-				int count = -1;
-				for( int i=0 ; i<list.Count ; i++ )
-				{
-					string next = list[i];
-					int nextHash = next.GetHashCode();
-					if( nextHash==currentHash )
-					{
-						count++;
-					}
-					else
-					{
-						if( !string.IsNullOrEmpty(current) )
-							shorterList.Add( ( current , count ) );
-						current = list[i];
-						currentHash = current.GetHashCode();
-						count = 1;
-						currentHash = nextHash;
-					}
-				}
-			}
 
-			entries = shorterList.ToArray();
-		}
-
-		// create log view ui:
+	ListView CreateListViewForEntries ( Entry[] entries )
+	{
 		var LOG_LINES = new ListView();
 		{
 			var style = LOG_LINES.style;
@@ -159,7 +107,7 @@ public class MainPanelController : MonoBehaviour
 			};
 			LOG_LINES.bindItem = (root,i) =>
 			{
-				(string text,int count) entry = ((string,int)) LOG_LINES.itemsSource[i];
+				Entry entry = (Entry) LOG_LINES.itemsSource[i];
 				ScrollView scrollView = (ScrollView) root[0];
 				Label mainLabel = (Label) scrollView[0];
 				{
@@ -179,9 +127,94 @@ public class MainPanelController : MonoBehaviour
 					repeatsLabel.visible = false;
 				}
 			};
-			LOG_LINES.onSelectionChange += (obj)=> GUIUtility.systemCopyBuffer = (((string text,int count)) obj.FirstOrDefault()).text;
+			LOG_LINES.onSelectionChange += (obj)=> GUIUtility.systemCopyBuffer = ((Entry) obj.FirstOrDefault()).text;
 		}
-		rootVisualElement.Add( LOG_LINES );
+		return LOG_LINES;
+	}
+
+
+	Entry[] RawLinesToEntries ( string[] rawLines )
+	{
+		List<string> list = new List<string>();
+		var sb = new System.Text.StringBuilder();
+		foreach( string line in rawLines )
+		{
+			if( !string.IsNullOrEmpty(line) )
+			{
+				if( line[0]!='[' )
+					sb.AppendLine( line );
+				else
+				{
+					if( list.Count!=0 )
+						list[list.Count-1] += line;
+				}
+			}
+			else if( sb.Length!=0 )
+			{
+				list.Add( sb.ToString() );
+				sb.Clear();
+			}
+		}
+		
+		List<Entry> entriesList = new List<Entry>( capacity:list.Count );
+		if( list.Count!=0 )
+		{
+			string current = null;
+			int currentHash = -1;
+			int count = -1;
+			for( int i=0 ; i<list.Count ; i++ )
+			{
+				string next = list[i];
+				int nextHash = next.GetHashCode();
+				if( nextHash==currentHash )
+				{
+					count++;
+				}
+				else
+				{
+					if( !string.IsNullOrEmpty(current) )
+						entriesList.Add( new Entry{ text=current , count=count } );
+					current = list[i];
+					currentHash = current.GetHashCode();
+					count = 1;
+					currentHash = nextHash;
+				}
+			}
+		}
+
+		return entriesList.ToArray();
+	}
+
+
+	bool LoadRawLines ( out string[] rawLines )
+	{
+		#if UNITY_EDITOR
+		// read any example of a log file, to make build preview ui from:
+		try
+		{
+			string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
+			if( IO.Directory.Exists(logsDirectory) )
+			{
+				string[] files = IO.Directory.GetFiles(logsDirectory);
+				string path = files[Random.Range(0,files.Length)];
+				rawLines = WriteSafeReadAllLines( path );
+			}
+		}
+		catch( System.Exception ex ) { Debug.LogException(ex); }
+		#endif
+
+		// read log file:
+		foreach( string argument in System.Environment.GetCommandLineArgs() )
+		{
+			if( IO.Path.GetExtension(argument)==".log" && IO.File.Exists(argument) )
+			{
+				rawLines = WriteSafeReadAllLines( argument );
+				return true;
+			}
+		}
+
+		rawLines = null;
+		return false;
 	}
 
 
@@ -195,6 +228,12 @@ public class MainPanelController : MonoBehaviour
 				file.Add( sr.ReadLine() );
 			return file.ToArray();
 		}
+	}
+
+	struct Entry
+	{
+		public string text;
+		public int count;
 	}
 
 
