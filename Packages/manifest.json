@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "com.unity.ide.vscode": "1.2.3",
+    "com.unity.render-pipelines.universal": "11.0.0",
+    "com.unity.modules.imgui": "1.0.0",
+    "com.unity.modules.jsonserialize": "1.0.0",
+    "com.unity.modules.physics": "1.0.0",
+	"com.unity.platforms.windows": "0.10.0-preview.10",
+	"com.unity.ui": "1.0.0-preview.14",
+	"com.unity.ui.builder": "1.0.0-preview.14",
+    "com.unity.modules.uielements": "1.0.0"
+  }
+}

@@ -1,0 +1,22 @@
+{
+    "Dependencies": [],
+    "Components": [
+        {
+            "$type": "Unity.Build.Common.GeneralSettings, Unity.Build",
+            "ProductName": "Unity Log File Reader",
+            "CompanyName": "Andrew Raphael Lukasik",
+            "Version": "0.1.1.0"
+        },
+        {
+            "$type": "Unity.Build.Common.SceneList, Unity.Build",
+            "$version": 1,
+            "BuildCurrentScene": false,
+            "SceneInfos": [
+                {
+                    "Scene": "GlobalObjectId_V1-1-437a915b66287734caa29033e8e5abd1-102900000-0",
+                    "AutoLoad": true
+                }
+            ]
+        }
+    ]
+}
