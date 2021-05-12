@@ -165,7 +165,9 @@ public class MainPanelController : MonoBehaviour
 				{
 					var style = mainLabel.style;
 					style.textOverflow = TextOverflow.Ellipsis;
-					style.backgroundColor = Color.HSVToRGB( (float)new System.Random(entry.text.GetHashCode()).NextDouble() , 0.5f , 0.8f );
+					var col = TextToColor( entry.text );
+					Color.RGBToHSV( col , out float h  , out float s , out float v );
+					style.backgroundColor = Color.HSVToRGB( h , 0.5f , 0.8f );
 				}
 				mainLabel.text = entry.text;
 				Label repeatsLabel = (Label) root[1];
@@ -195,6 +197,16 @@ public class MainPanelController : MonoBehaviour
 				file.Add( sr.ReadLine() );
 			return file.ToArray();
 		}
+	}
+
+
+	Color TextToColor ( string text )
+	{
+		var md5 = System.Security.Cryptography.MD5.Create();
+		var bytes = md5.ComputeHash( System.Text.Encoding.UTF8.GetBytes(text) );
+		md5.Dispose();
+		var color = new Color32( bytes[0] , bytes[1] , bytes[2] , 255 );
+		return color;
 	}
 
 
