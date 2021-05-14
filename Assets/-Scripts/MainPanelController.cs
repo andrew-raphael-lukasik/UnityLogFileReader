@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 using IO = System.IO;
-using Regex = System.Text.RegularExpressions.Regex;
 
 [ExecuteAlways]
 [RequireComponent( typeof(UIDocument) )]
@@ -12,80 +11,102 @@ public class MainPanelController : MonoBehaviour
 {
 	
 
-	ListView _mainView = null;
+	ListView _list = null;
 
 
 	void Awake () => InvokeRepeating( nameof(Tick) , time:0 , repeatRate:Mathf.Sqrt(2) );
+	
+	
+	#if UNITY_EDITOR
 	void OnEnable () => Tick();
+	#endif
 
 
 	void Tick ()
 	{
-		if( _mainView!=null )
+		if( ListViewExists() )
 		{
+			bool readSuccess = ReadRawLines( out string[] rawLines );
+			_list.itemsSource = ProcessRawLines( rawLines );
 
+			#if UNITY_EDITOR
+			if( !readSuccess )
+			{
+				// read any example of a log file, to make build preview ui from:
+				try
+				{
+					string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
+					if( IO.Directory.Exists(logsDirectory) )
+					{
+						string[] files = IO.Directory.GetFiles(logsDirectory);
+						string path = files[Random.Range(0,files.Length)];
+						rawLines = WriteSafeReadAllLines( path );
+						_list.itemsSource = ProcessRawLines( rawLines );
+					}
+				}
+				catch( System.Exception ex ) { Debug.LogException(ex); }
+			}
+			#endif
 		}
+	}
+
+
+	bool ListViewExists ()
+	{
+		if( _list!=null )
+			return true;
 		else
 		{
 			var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
 			if( rootVisualElement!=null )
 			{
 				rootVisualElement.Clear();
-				CreateUI( rootVisualElement );
-
-				_mainView = new ListView();
-
+				_list = CreateMainListView();
+				rootVisualElement.Add( _list );
+				return true;
 			}
+			else
+				return false;
 		}
 	}
 
 
-	void CreateUI ( VisualElement rootVisualElement )
+	bool ReadRawLines ( out string[] rawLines )
 	{
-		if( LoadRawLines( out string[] rawLines ) )
+		// read log file:
+		foreach( string argument in System.Environment.GetCommandLineArgs() )
+		if( IO.Path.GetExtension(argument)==".log" && IO.File.Exists(argument) )
 		{
-			var entries = RawLinesToEntries( rawLines );
-			var listView = CreateListViewForEntries( entries );
-			rootVisualElement.Add( listView );
+			rawLines = WriteSafeReadAllLines( argument );
+			return true;
 		}
-		else
-		{
-			rootVisualElement.Add( new Label("No log file path provided/recognised in execution arguments.") );
-			var ARGUMENTS = new ListView();
-			{
-				var style = ARGUMENTS.style;
-				style.minHeight = 300;
-				style.flexGrow = 1;
-			}
-			{
-				List<string> arguemnts = new List<string>();
-				foreach( string argument in System.Environment.GetCommandLineArgs() )
-					arguemnts.Add( argument );
 
-				ARGUMENTS.itemsSource = arguemnts;
-				ARGUMENTS.itemHeight = 20;
-				ARGUMENTS.makeItem = () => new Label();
-				ARGUMENTS.bindItem = (ve,i) => ((Label)ve).text = (string) ARGUMENTS.itemsSource[i];
-			}
-			rootVisualElement.Add( ARGUMENTS );
-			return;
+		// fallback: fill array with debug messages:
+		List<string> debugMessages = new List<string>();
+		debugMessages.Add( "No log file path provided/recognised in execution arguments." );
+		debugMessages.Add( "CommandLineArgs:" );
+		debugMessages.Add(string.Empty);
+		foreach( string argument in System.Environment.GetCommandLineArgs() )
+		{
+			debugMessages.Add( $"\t\"{argument}\"" );
+			debugMessages.Add(string.Empty);
 		}
+		rawLines = debugMessages.ToArray();
+		return false;
 	}
 
 
-	ListView CreateListViewForEntries ( Entry[] entries )
+	ListView CreateMainListView ()
 	{
-		var LOG_LINES = new ListView();
+		var LISTVIEW = new ListView();
 		{
-			var style = LOG_LINES.style;
+			var style = LISTVIEW.style;
 			style.minHeight = 300;
 			style.flexGrow = 1;
 		}
 		{
-			// 	string[] text_lines = Regex.Split( text , "\r\n|\r|\n" );
-			LOG_LINES.itemsSource = entries;
-			LOG_LINES.itemHeight = 120;
-			LOG_LINES.makeItem = () => {
+			LISTVIEW.itemHeight = 120;
+			LISTVIEW.makeItem = () => {
 				VisualElement root = new VisualElement();
 					root.style.flexDirection = FlexDirection.RowReverse;
 				
@@ -105,9 +126,9 @@ public class MainPanelController : MonoBehaviour
 				
 				return root;
 			};
-			LOG_LINES.bindItem = (root,i) =>
+			LISTVIEW.bindItem = (root,i) =>
 			{
-				Entry entry = (Entry) LOG_LINES.itemsSource[i];
+				Entry entry = (Entry) LISTVIEW.itemsSource[i];
 				ScrollView scrollView = (ScrollView) root[0];
 				Label mainLabel = (Label) scrollView[0];
 				{
@@ -128,13 +149,13 @@ public class MainPanelController : MonoBehaviour
 					repeatsLabel.visible = false;
 				}
 			};
-			LOG_LINES.onSelectionChange += (obj)=> GUIUtility.systemCopyBuffer = ((Entry) obj.FirstOrDefault()).text;
+			LISTVIEW.onSelectionChange += (obj)=> GUIUtility.systemCopyBuffer = ((Entry) obj.FirstOrDefault()).text;
 		}
-		return LOG_LINES;
+		return LISTVIEW;
 	}
 
 
-	Entry[] RawLinesToEntries ( string[] rawLines )
+	Entry[] ProcessRawLines ( string[] rawLines )
 	{
 		List<string> list = new List<string>();
 		var sb = new System.Text.StringBuilder();
@@ -144,17 +165,19 @@ public class MainPanelController : MonoBehaviour
 			{
 				if( line[0]!='[' )
 					sb.AppendLine( line );
-				else
-				{
-					if( list.Count!=0 )
-						list[list.Count-1] += line;
-				}
+				else if( list.Count!=0 )
+					list[list.Count-1] += line;
 			}
 			else if( sb.Length!=0 )
 			{
 				list.Add( sb.ToString() );
 				sb.Clear();
 			}
+		}
+		if( sb.Length!=0 )
+		{
+			list.Add( sb.ToString() );
+			sb.Clear();
 		}
 		
 		List<Entry> entriesList = new List<Entry>( capacity:list.Count );
@@ -168,9 +191,7 @@ public class MainPanelController : MonoBehaviour
 				string next = list[i];
 				int nextHash = next.GetHashCode();
 				if( nextHash==currentHash )
-				{
 					count++;
-				}
 				else
 				{
 					if( !string.IsNullOrEmpty(current) )
@@ -181,41 +202,11 @@ public class MainPanelController : MonoBehaviour
 					currentHash = nextHash;
 				}
 			}
+			if( !string.IsNullOrEmpty(current) )
+				entriesList.Add( new Entry{ text=current , count=count } );
 		}
 
 		return entriesList.ToArray();
-	}
-
-
-	bool LoadRawLines ( out string[] rawLines )
-	{
-		#if UNITY_EDITOR
-		// read any example of a log file, to make build preview ui from:
-		try
-		{
-			string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
-			if( IO.Directory.Exists(logsDirectory) )
-			{
-				string[] files = IO.Directory.GetFiles(logsDirectory);
-				string path = files[Random.Range(0,files.Length)];
-				rawLines = WriteSafeReadAllLines( path );
-			}
-		}
-		catch( System.Exception ex ) { Debug.LogException(ex); }
-		#endif
-
-		// read log file:
-		foreach( string argument in System.Environment.GetCommandLineArgs() )
-		{
-			if( IO.Path.GetExtension(argument)==".log" && IO.File.Exists(argument) )
-			{
-				rawLines = WriteSafeReadAllLines( argument );
-				return true;
-			}
-		}
-
-		rawLines = null;
-		return false;
 	}
 
 
