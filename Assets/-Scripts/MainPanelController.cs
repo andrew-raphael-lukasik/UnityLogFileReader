@@ -4,140 +4,109 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 using IO = System.IO;
-using Regex = System.Text.RegularExpressions.Regex;
 
 [ExecuteAlways]
 [RequireComponent( typeof(UIDocument) )]
 public class MainPanelController : MonoBehaviour
 {
-
 	
-	void OnEnable () => BindUI();
+
+	ListView _list = null;
 
 
-	void BindUI ()
+	void Awake () => InvokeRepeating( nameof(Tick) , time:0 , repeatRate:Mathf.Sqrt(2) );
+	
+	
+	#if UNITY_EDITOR
+	void OnEnable () => Tick();
+	#endif
+
+
+	void Tick ()
 	{
-		var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
-		if( rootVisualElement!=null )
+		if( ListViewExists() )
 		{
-			rootVisualElement.Clear();
-			CreateUI( rootVisualElement );
+			bool readSuccess = ReadRawLines( out string[] rawLines );
+			_list.itemsSource = ProcessRawLines( rawLines );
+
+			#if UNITY_EDITOR
+			if( !readSuccess )
+			{
+				// read any example of a log file, to make build preview ui from:
+				try
+				{
+					string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
+					if( IO.Directory.Exists(logsDirectory) )
+					{
+						string[] files = IO.Directory.GetFiles(logsDirectory);
+						string path = files[Random.Range(0,files.Length)];
+						rawLines = WriteSafeReadAllLines( path );
+						_list.itemsSource = ProcessRawLines( rawLines );
+					}
+				}
+				catch( System.Exception ex ) { Debug.LogException(ex); }
+			}
+			#endif
 		}
 	}
 
 
-	void CreateUI ( VisualElement rootVisualElement )
+	bool ListViewExists ()
 	{
-		string[] rawLines = null;
-
-		#if UNITY_EDITOR
-		// read any example of a log file, to make build preview ui from:
-		try
+		if( _list!=null )
+			return true;
+		else
 		{
-			string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
-			if( IO.Directory.Exists(logsDirectory) )
+			var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
+			if( rootVisualElement!=null )
 			{
-				string[] files = IO.Directory.GetFiles(logsDirectory);
-				string path = files[Random.Range(0,files.Length)];
-				rawLines = WriteSafeReadAllLines( path );
+				rootVisualElement.Clear();
+				_list = CreateMainListView();
+				rootVisualElement.Add( _list );
+				return true;
 			}
+			else
+				return false;
 		}
-		catch( System.Exception ex ) { Debug.LogException(ex); }
-		#endif
+	}
 
+
+	bool ReadRawLines ( out string[] rawLines )
+	{
 		// read log file:
 		foreach( string argument in System.Environment.GetCommandLineArgs() )
+		if( IO.Path.GetExtension(argument)==".log" && IO.File.Exists(argument) )
 		{
-			if( IO.Path.GetExtension(argument)==".log" && IO.File.Exists(argument) )
-			{
-				rawLines = WriteSafeReadAllLines( argument );
-				break;
-			}
-		}
-		if( rawLines==null )
-		{
-			rootVisualElement.Add( new Label("No log file path provided/recognised in execution arguments.") );
-			var ARGUMENTS = new ListView();
-			{
-				var style = ARGUMENTS.style;
-				style.minHeight = 300;
-				style.flexGrow = 1;
-			}
-			{
-				ARGUMENTS.itemsSource = rawLines;
-				ARGUMENTS.itemHeight = 20;
-				ARGUMENTS.makeItem = () => new Label();
-				ARGUMENTS.bindItem = (ve,i) => ((Label)ve).text = (string) ARGUMENTS.itemsSource[i];
-			}
-			rootVisualElement.Add( ARGUMENTS );
-			return;
+			rawLines = WriteSafeReadAllLines( argument );
+			return true;
 		}
 
-		(string text,int count)[] entries = null;
-		if( rawLines!=null )
+		// fallback: fill array with debug messages:
+		List<string> debugMessages = new List<string>();
+		debugMessages.Add( "No log file path provided/recognised in execution arguments." );
+		debugMessages.Add( "CommandLineArgs:" );
+		debugMessages.Add(string.Empty);
+		foreach( string argument in System.Environment.GetCommandLineArgs() )
 		{
-			List<string> list = new List<string>();
-			var sb = new System.Text.StringBuilder();
-			foreach( string line in rawLines )
-			{
-				if( !string.IsNullOrEmpty(line) )
-				{
-					if( line[0]!='[' )
-						sb.AppendLine( line );
-					else
-					{
-						if( list.Count!=0 )
-							list[list.Count-1] += line;
-					}
-				}
-				else if( sb.Length!=0 )
-				{
-					list.Add( sb.ToString() );
-					sb.Clear();
-				}
-			}
-			
-			List<(string text,int count)> shorterList = new List<(string,int)>( capacity:list.Count );
-			if( list.Count!=0 )
-			{
-				string current = null;
-				int currentHash = -1;
-				int count = -1;
-				for( int i=0 ; i<list.Count ; i++ )
-				{
-					string next = list[i];
-					int nextHash = next.GetHashCode();
-					if( nextHash==currentHash )
-					{
-						count++;
-					}
-					else
-					{
-						if( !string.IsNullOrEmpty(current) )
-							shorterList.Add( ( current , count ) );
-						current = list[i];
-						currentHash = current.GetHashCode();
-						count = 1;
-						currentHash = nextHash;
-					}
-				}
-			}
-
-			entries = shorterList.ToArray();
+			debugMessages.Add( $"\t\"{argument}\"" );
+			debugMessages.Add(string.Empty);
 		}
+		rawLines = debugMessages.ToArray();
+		return false;
+	}
 
-		// create log view ui:
-		var LOG_LINES = new ListView();
+
+	ListView CreateMainListView ()
+	{
+		var LISTVIEW = new ListView();
 		{
-			var style = LOG_LINES.style;
+			var style = LISTVIEW.style;
 			style.minHeight = 300;
 			style.flexGrow = 1;
 		}
 		{
-			// 	string[] text_lines = Regex.Split( text , "\r\n|\r|\n" );
-			LOG_LINES.itemsSource = entries;
-			LOG_LINES.itemHeight = 120;
-			LOG_LINES.makeItem = () => {
+			LISTVIEW.itemHeight = 120;
+			LISTVIEW.makeItem = () => {
 				VisualElement root = new VisualElement();
 					root.style.flexDirection = FlexDirection.RowReverse;
 				
@@ -157,16 +126,15 @@ public class MainPanelController : MonoBehaviour
 				
 				return root;
 			};
-			LOG_LINES.bindItem = (root,i) =>
+			LISTVIEW.bindItem = (root,i) =>
 			{
-				(string text,int count) entry = ((string,int)) LOG_LINES.itemsSource[i];
+				Entry entry = (Entry) LISTVIEW.itemsSource[i];
 				ScrollView scrollView = (ScrollView) root[0];
 				Label mainLabel = (Label) scrollView[0];
 				{
 					var style = mainLabel.style;
 					style.textOverflow = TextOverflow.Ellipsis;
-					var col = TextToColor( entry.text );
-					Color.RGBToHSV( col , out float h  , out float s , out float v );
+					Color.RGBToHSV( TextToColor(entry.text) , out float h  , out float s , out float v );
 					style.backgroundColor = Color.HSVToRGB( h , 0.5f , 0.8f );
 				}
 				mainLabel.text = entry.text;
@@ -181,9 +149,64 @@ public class MainPanelController : MonoBehaviour
 					repeatsLabel.visible = false;
 				}
 			};
-			LOG_LINES.onSelectionChange += (obj)=> GUIUtility.systemCopyBuffer = (((string text,int count)) obj.FirstOrDefault()).text;
+			LISTVIEW.onSelectionChange += (obj)=> GUIUtility.systemCopyBuffer = ((Entry) obj.FirstOrDefault()).text;
 		}
-		rootVisualElement.Add( LOG_LINES );
+		return LISTVIEW;
+	}
+
+
+	Entry[] ProcessRawLines ( string[] rawLines )
+	{
+		List<string> list = new List<string>();
+		var sb = new System.Text.StringBuilder();
+		foreach( string line in rawLines )
+		{
+			if( !string.IsNullOrEmpty(line) )
+			{
+				if( line[0]!='[' )
+					sb.AppendLine( line );
+				else if( list.Count!=0 )
+					list[list.Count-1] += line;
+			}
+			else if( sb.Length!=0 )
+			{
+				list.Add( sb.ToString() );
+				sb.Clear();
+			}
+		}
+		if( sb.Length!=0 )
+		{
+			list.Add( sb.ToString() );
+			sb.Clear();
+		}
+		
+		List<Entry> entriesList = new List<Entry>( capacity:list.Count );
+		if( list.Count!=0 )
+		{
+			string current = null;
+			int currentHash = -1;
+			int count = -1;
+			for( int i=0 ; i<list.Count ; i++ )
+			{
+				string next = list[i];
+				int nextHash = next.GetHashCode();
+				if( nextHash==currentHash )
+					count++;
+				else
+				{
+					if( !string.IsNullOrEmpty(current) )
+						entriesList.Add( new Entry{ text=current , count=count } );
+					current = list[i];
+					currentHash = current.GetHashCode();
+					count = 1;
+					currentHash = nextHash;
+				}
+			}
+			if( !string.IsNullOrEmpty(current) )
+				entriesList.Add( new Entry{ text=current , count=count } );
+		}
+
+		return entriesList.ToArray();
 	}
 
 
@@ -207,6 +230,13 @@ public class MainPanelController : MonoBehaviour
 		md5.Dispose();
 		var color = new Color32( bytes[0] , bytes[1] , bytes[2] , 255 );
 		return color;
+	}
+
+
+	struct Entry
+	{
+		public string text;
+		public int count;
 	}
 
 

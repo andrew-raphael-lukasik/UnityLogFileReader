@@ -5,7 +5,7 @@
             "$type": "Unity.Build.Common.GeneralSettings, Unity.Build",
             "ProductName": "Unity Log File Reader",
             "CompanyName": "Andrew Raphael Lukasik",
-            "Version": "0.1.4.0"
+            "Version": "0.1.5.0"
         },
         {
             "$type": "Unity.Build.Common.SceneList, Unity.Build",
