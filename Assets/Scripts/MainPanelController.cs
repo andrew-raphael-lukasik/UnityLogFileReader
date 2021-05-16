@@ -11,73 +11,64 @@ public class MainPanelController : MonoBehaviour
 {
 	
 
-	ListView _list = null;
+	EntryListView _list = null;
+	Label _filePath = null;
 
 
-	void Awake () => InvokeRepeating( nameof(Tick) , time:0 , repeatRate:Mathf.Sqrt(2) );
-	
-	
-	#if UNITY_EDITOR
-	void OnEnable () => Tick();
-	#endif
+	void Awake ()
+	{
+		Bind();
+		InvokeRepeating( nameof(Tick) , time:0 , repeatRate:Mathf.Sqrt(2) );
+	}
 
 
 	void Tick ()
 	{
-		if( ListViewExists() )
-		{
-			bool readSuccess = ReadRawLines( out string[] rawLines );
-			_list.itemsSource = ProcessRawLines( rawLines );
+		bool readSuccess = ReadRawLines( out string[] rawLines , out string filePath );
+		_list.itemsSource = ProcessRawLines( rawLines );
+		_filePath.text = filePath;
 
-			#if UNITY_EDITOR
-			if( !readSuccess )
+		#if UNITY_EDITOR
+		if( !readSuccess )
+		{
+			// read any example of a log file, to make build preview ui from:
+			try
 			{
-				// read any example of a log file, to make build preview ui from:
-				try
+				string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
+				if( IO.Directory.Exists(logsDirectory) )
 				{
-					string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
-					if( IO.Directory.Exists(logsDirectory) )
-					{
-						string[] files = IO.Directory.GetFiles(logsDirectory);
-						string path = files[Random.Range(0,files.Length)];
-						rawLines = WriteSafeReadAllLines( path );
-						_list.itemsSource = ProcessRawLines( rawLines );
-					}
+					string[] files = IO.Directory.GetFiles(logsDirectory);
+					string path = files[Random.Range(0,files.Length)];
+					rawLines = WriteSafeReadAllLines( path );
+					_list.itemsSource = ProcessRawLines( rawLines );
 				}
-				catch( System.Exception ex ) { Debug.LogException(ex); }
 			}
-			#endif
+			catch( System.Exception ex ) { Debug.LogException(ex); }
 		}
+		#endif
 	}
 
 
-	bool ListViewExists ()
+	void Bind ()
 	{
-		if( _list!=null )
-			return true;
-		else
+		var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
+		if( rootVisualElement!=null )
 		{
-			var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
-			if( rootVisualElement!=null )
-			{
-				rootVisualElement.Clear();
-				_list = CreateMainListView();
-				rootVisualElement.Add( _list );
-				return true;
-			}
-			else
-				return false;
+			_list = rootVisualElement.Q<EntryListView>();
+			rootVisualElement.Add( _list );
+			_filePath = rootVisualElement.Q<Label>( "file_path" );
 		}
 	}
 
 
-	bool ReadRawLines ( out string[] rawLines )
+	bool ReadRawLines ( out string[] rawLines , out string filePath )
 	{
 		// read log file:
 		foreach( string argument in System.Environment.GetCommandLineArgs() )
 		if( IO.Path.GetExtension(argument)==".log" && IO.File.Exists(argument) )
 		{
 			rawLines = WriteSafeReadAllLines( argument );
+			filePath = argument;
 			return true;
 		}
 
@@ -92,66 +83,8 @@ public class MainPanelController : MonoBehaviour
 			debugMessages.Add(string.Empty);
 		}
 		rawLines = debugMessages.ToArray();
+		filePath = "N/A";
 		return false;
-	}
-
-
-	ListView CreateMainListView ()
-	{
-		var LISTVIEW = new ListView();
-		{
-			var style = LISTVIEW.style;
-			style.minHeight = 300;
-			style.flexGrow = 1;
-		}
-		{
-			LISTVIEW.itemHeight = 120;
-			LISTVIEW.makeItem = () => {
-				VisualElement root = new VisualElement();
-					root.style.flexDirection = FlexDirection.RowReverse;
-				
-				var scrollView = new ScrollView();
-					scrollView.style.width = new Length( 95 , LengthUnit.Percent );
-				var mainLabel = new Label();
-					mainLabel.enableRichText = true;
-				scrollView.Add( mainLabel );
-				root.Add( scrollView );
-
-				var repeatsLabel = new Label();
-					repeatsLabel.style.width = new Length( 5 , LengthUnit.Percent );
-					repeatsLabel.tooltip = "Number of repeats.";
-					repeatsLabel.displayTooltipWhenElided = true;
-					repeatsLabel.focusable = true;
-				root.Add( repeatsLabel );
-				
-				return root;
-			};
-			LISTVIEW.bindItem = (root,i) =>
-			{
-				Entry entry = (Entry) LISTVIEW.itemsSource[i];
-				ScrollView scrollView = (ScrollView) root[0];
-				Label mainLabel = (Label) scrollView[0];
-				{
-					var style = mainLabel.style;
-					style.textOverflow = TextOverflow.Ellipsis;
-					Color.RGBToHSV( TextToColor(entry.text) , out float h  , out float s , out float v );
-					style.backgroundColor = Color.HSVToRGB( h , 0.5f , 0.8f );
-				}
-				mainLabel.text = entry.text;
-				Label repeatsLabel = (Label) root[1];
-				if( entry.count!=1 )
-				{
-					repeatsLabel.text = $"{entry.count}x";
-					repeatsLabel.visible = true;
-				}
-				else
-				{
-					repeatsLabel.visible = false;
-				}
-			};
-			LISTVIEW.onSelectionChange += (obj)=> GUIUtility.systemCopyBuffer = ((Entry) obj.FirstOrDefault()).text;
-		}
-		return LISTVIEW;
 	}
 
 
@@ -220,23 +153,6 @@ public class MainPanelController : MonoBehaviour
 				file.Add( sr.ReadLine() );
 			return file.ToArray();
 		}
-	}
-
-
-	Color TextToColor ( string text )
-	{
-		var md5 = System.Security.Cryptography.MD5.Create();
-		var bytes = md5.ComputeHash( System.Text.Encoding.UTF8.GetBytes(text) );
-		md5.Dispose();
-		var color = new Color32( bytes[0] , bytes[1] , bytes[2] , 255 );
-		return color;
-	}
-
-
-	struct Entry
-	{
-		public string text;
-		public int count;
 	}
 
 
