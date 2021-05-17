@@ -1,4 +1,4 @@
-Label {
+EntryListView Label {
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
@@ -53,5 +53,15 @@ ScrollView {
     flex-grow: 1;
 }
 
-ListView {
+EntryListView Label:hover {
+    border-left-color: rgb(255, 255, 255);
+    border-right-color: rgb(255, 255, 255);
+    border-top-color: rgb(255, 255, 255);
+    border-bottom-color: rgb(255, 255, 255);
+}
+
+Foldout {
+}
+
+Foldout Label {
 }
