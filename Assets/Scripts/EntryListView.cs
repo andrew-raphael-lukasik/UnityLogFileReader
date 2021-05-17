@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,14 +16,10 @@ public class EntryListView : VisualElement
 	public new class UxmlFactory : UxmlFactory<EntryListView,UxmlTraits> {}
 	public new class UxmlTraits : VisualElement.UxmlTraits
 	{
-
-		public override IEnumerable<UxmlChildElementDescription> uxmlChildElementsDescription { get { yield break; } }
-
 		public override void Init ( VisualElement ve , IUxmlAttributes bag , CreationContext cc )
 		{
 			base.Init( ve , bag , cc );
-			EntryListView obj = ve as EntryListView;
-			// obj.Clear();
+			EntryListView ROOT = ve as EntryListView;
 			
 			var LISTVIEW = new ListView();
 			LISTVIEW.style.flexGrow = 1;
@@ -35,29 +30,29 @@ public class EntryListView : VisualElement
 				
 				LISTVIEW.itemHeight = 120;
 				LISTVIEW.makeItem = () => {
-					VisualElement root = new VisualElement();
-						root.style.flexDirection = FlexDirection.RowReverse;
+					VisualElement item = new VisualElement();
+						item.style.flexDirection = FlexDirection.RowReverse;
 					
 					var scrollView = new ScrollView();
 						scrollView.style.width = new Length( 95 , LengthUnit.Percent );
 					var mainLabel = new Label();
 						mainLabel.enableRichText = true;
 					scrollView.Add( mainLabel );
-					root.Add( scrollView );
+					item.Add( scrollView );
 
 					var repeatsLabel = new Label();
 						repeatsLabel.style.width = new Length( 5 , LengthUnit.Percent );
 						repeatsLabel.tooltip = "Number of repetitions.";
 						repeatsLabel.displayTooltipWhenElided = true;
 						repeatsLabel.focusable = true;
-					root.Add( repeatsLabel );
+					item.Add( repeatsLabel );
 					
-					return root;
+					return item;
 				};
-				LISTVIEW.bindItem = (root,i) =>
+				LISTVIEW.bindItem = (item,i) =>
 				{
 					Entry entry = (Entry) LISTVIEW.itemsSource[i];
-					ScrollView scrollView = (ScrollView) root[0];
+					ScrollView scrollView = (ScrollView) item[0];
 					Label mainLabel = (Label) scrollView[0];
 					{
 						var style = mainLabel.style;
@@ -66,7 +61,7 @@ public class EntryListView : VisualElement
 						style.backgroundColor = Color.HSVToRGB( h , 0.5f , 0.8f );
 					}
 					mainLabel.text = entry.text;
-					Label repeatsLabel = (Label) root[1];
+					Label repeatsLabel = (Label) item[1];
 					if( entry.count!=1 )
 					{
 						repeatsLabel.text = $"{entry.count}x";
@@ -79,8 +74,9 @@ public class EntryListView : VisualElement
 				};
 				LISTVIEW.onSelectionChange += (obj)=> GUIUtility.systemCopyBuffer = ((Entry) obj.FirstOrDefault()).text;
 			}
-			obj.Add( LISTVIEW );
-			obj._listView = LISTVIEW;
+			
+			ROOT.Add( LISTVIEW );
+			ROOT._listView = LISTVIEW;
 		}
 
 		Color TextToColor ( string text )
