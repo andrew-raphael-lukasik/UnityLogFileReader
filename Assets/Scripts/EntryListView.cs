@@ -35,17 +35,18 @@ public class EntryListView : VisualElement
 					
 					var scrollView = new ScrollView();
 						scrollView.style.width = new Length( 95 , LengthUnit.Percent );
-					var mainLabel = new Label();
-						mainLabel.enableRichText = true;
-					scrollView.Add( mainLabel );
+					var mainField = new TextField();
+						mainField.isReadOnly = true;
+					scrollView.Add( mainField );
 					item.Add( scrollView );
 
-					var repeatsLabel = new Label();
-						repeatsLabel.style.width = new Length( 5 , LengthUnit.Percent );
-						repeatsLabel.tooltip = "Number of repetitions.";
-						repeatsLabel.displayTooltipWhenElided = true;
-						repeatsLabel.focusable = true;
-					item.Add( repeatsLabel );
+					var repeatsField = new TextField();
+						repeatsField.style.width = new Length( 5 , LengthUnit.Percent );
+						repeatsField.tooltip = "Number of repetitions.";
+						// repeatsField.displayTooltipWhenElided = true;
+						repeatsField.focusable = true;
+						repeatsField.isReadOnly = true;
+					item.Add( repeatsField );
 					
 					return item;
 				};
@@ -53,23 +54,23 @@ public class EntryListView : VisualElement
 				{
 					Entry entry = (Entry) LISTVIEW.itemsSource[i];
 					ScrollView scrollView = (ScrollView) item[0];
-					Label mainLabel = (Label) scrollView[0];
+					TextField mainField = (TextField) scrollView[0];
 					{
-						var style = mainLabel.style;
+						var style = mainField.style;
 						style.textOverflow = TextOverflow.Ellipsis;
 						Color.RGBToHSV( TextToColor(entry.text) , out float h  , out float s , out float v );
 						style.backgroundColor = Color.HSVToRGB( h , 0.5f , 0.8f );
 					}
-					mainLabel.text = entry.text;
-					Label repeatsLabel = (Label) item[1];
+					mainField.SetValueWithoutNotify( entry.text );
+					TextField repeatsField = (TextField) item[1];
 					if( entry.count!=1 )
 					{
-						repeatsLabel.text = $"{entry.count}x";
-						repeatsLabel.visible = true;
+						repeatsField.SetValueWithoutNotify( $"{entry.count}x" );
+						repeatsField.visible = true;
 					}
 					else
 					{
-						repeatsLabel.visible = false;
+						repeatsField.visible = false;
 					}
 				};
 				LISTVIEW.onSelectionChange += (obj)=> GUIUtility.systemCopyBuffer = ((Entry) obj.FirstOrDefault()).text;

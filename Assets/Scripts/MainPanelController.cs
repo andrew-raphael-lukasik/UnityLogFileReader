@@ -13,7 +13,7 @@ public class MainPanelController : MonoBehaviour
 	HistoryListView _historyView = null;
 	Button _historyClear = null;
 	
-	Label _filePathLabel = null;
+	TextField _filePathField = null;
 	IO.FileSystemWatcher _filePathWatcher = null;
 
 
@@ -56,7 +56,7 @@ public class MainPanelController : MonoBehaviour
 			_listView = rootVisualElement.Q<EntryListView>();
 
 			// file path label:
-			_filePathLabel = rootVisualElement.Q<Label>( "file_path" );
+			_filePathField = rootVisualElement.Q<TextField>( "file_path" );
 
 			// history list view:
 			_historyView = rootVisualElement.Q<HistoryListView>();
@@ -98,7 +98,7 @@ public class MainPanelController : MonoBehaviour
 			UpdateListView( path );
 		};
 
-		_filePathLabel.text = path;
+		_filePathField.SetValueWithoutNotify( path );
 
 		History.Update( path );
 		_historyView.itemsSource = History.Read();

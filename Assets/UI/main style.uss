@@ -1,4 +1,16 @@
-EntryListView Label {
+Label {
+}
+
+TextInput {
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+EntryListView TextField {
     border-left-width: 1px;
     border-right-width: 1px;
     border-top-width: 1px;
