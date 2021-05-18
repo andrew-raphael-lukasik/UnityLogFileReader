@@ -95,7 +95,6 @@ public class MainPanelController : MonoBehaviour
 		_filePathWatcher.NotifyFilter = IO.NotifyFilters.LastWrite;
 		_filePathWatcher.EnableRaisingEvents = true;
 		_filePathWatcher.Changed += (sender,e) => {
-			Debug.Log("file changed");
 			UpdateListView( path );
 		};
 
