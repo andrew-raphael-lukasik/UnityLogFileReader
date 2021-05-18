@@ -3,13 +3,15 @@ Simple windows app to make reading Unity *.log files easier on your eyes and bra
 
 ## Features:
 - Collapses repeating messages.
+- Continuously updated file view.
 - Single mouse-click copies the given message.
 - Identical messages share color value.
+- File history.
 
 ## See for yourself:
 
 Notepad <--> this
- ![preview](https://i.imgur.com/KWaBff2.jpg)
+ ![preview](https://i.imgur.com/v9tCo9N.jpg)
 
 ## Installation:
 - Download [binary files](https://github.com/andrew-raphael-lukasik/UnityLogFileReader/releases) or compile project yourself.
