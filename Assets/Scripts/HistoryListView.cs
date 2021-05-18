@@ -7,6 +7,14 @@ using IO = System.IO;
 public class HistoryListView : VisualElement
 {
 
+	ListView _listView;
+
+	public string[] itemsSource {
+		get => _listView.itemsSource as string[];
+		set => _listView.itemsSource = value;
+	}
+
+
 	public event System.Action<string> onClicked = (s) => {};
 
 	public new class UxmlFactory : UxmlFactory<HistoryListView,UxmlTraits> {}
@@ -45,6 +53,7 @@ public class HistoryListView : VisualElement
 			}
 			
 			ROOT.Add( LISTVIEW );
+			ROOT._listView = LISTVIEW;
 			{
 				var style = ROOT.style;
 				style.minHeight = LISTVIEW.itemHeight * 4.5f;

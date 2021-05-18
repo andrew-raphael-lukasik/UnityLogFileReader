@@ -10,48 +10,40 @@ public class MainPanelController : MonoBehaviour
 {
 	
 	EntryListView _listView = null;
+	HistoryListView _historyView = null;
+	Button _historyClear = null;
 	
-	string _filePath = null;
 	Label _filePathLabel = null;
+	IO.FileSystemWatcher _filePathWatcher = null;
 
 
 	void Awake ()
 	{
 		Bind();
-		InvokeRepeating( nameof(Tick) , time:0 , repeatRate:Mathf.Sqrt(2) );
-	}
+		
+		bool readSuccess = ReadFromCommandLineArgs( out string[] rawLines , out string path );
+		UpdateListView( rawLines );
+		if( readSuccess )
+			WatchFile( path );
 
-
-	void Tick ()
-	{
-		if( _filePath!=null )
+		#if UNITY_EDITOR
+		if( !readSuccess )
 		{
-			UpdateListView( _filePath );
-		}
-		else
-		{
-			bool readSuccess = ReadFromCommandLineArgs( out string[] rawLines , out _filePath );
-			UpdateListView( rawLines , _filePath );
-
-			#if UNITY_EDITOR
-			if( !readSuccess )
+			// read any example of a log file, to make build preview ui from:
+			try
 			{
-				// read any example of a log file, to make build preview ui from:
-				try
+				string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
+				if( IO.Directory.Exists(logsDirectory) )
 				{
-					string logsDirectory = IO.Path.Combine( Application.dataPath.Replace("/Assets","") , "Logs/" );
-					if( IO.Directory.Exists(logsDirectory) )
-					{
-						string[] files = IO.Directory.GetFiles(logsDirectory);
-						string path = files[Random.Range(0,files.Length)];
-						_filePath = path;
-						UpdateListView( path );
-					}
+					string[] files = IO.Directory.GetFiles(logsDirectory);
+					string editorLogPath = files[Random.Range(0,files.Length)];
+					WatchFile( editorLogPath );
+					UpdateListView( editorLogPath );
 				}
-				catch( System.Exception ex ) { Debug.LogException(ex); }
 			}
-			#endif
+			catch( System.Exception ex ) { Debug.LogException(ex); }
 		}
+		#endif
 	}
 
 
@@ -60,36 +52,57 @@ public class MainPanelController : MonoBehaviour
 		var rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
 		if( rootVisualElement!=null )
 		{
+			// entry list view:
 			_listView = rootVisualElement.Q<EntryListView>();
-			rootVisualElement.Add( _listView );
 
+			// file path label:
 			_filePathLabel = rootVisualElement.Q<Label>( "file_path" );
 
-			var historyView = rootVisualElement.Q<HistoryListView>();
-			if( historyView!=null )
+			// history list view:
+			_historyView = rootVisualElement.Q<HistoryListView>();
+			if( _historyView!=null )
 			{
-				historyView.onClicked += (path) =>
+				_historyView.onClicked += (path) =>
 				{
-					_filePath = path;
+					WatchFile( path );
 					UpdateListView( path );
 				};
 			}
+
+			// history clear button:
+			_historyClear = rootVisualElement.Q<Button>( "history_clear" );
+			_historyClear.clicked += () => {
+				var empty = new string[0];
+				History.Write( empty );
+				_historyView.itemsSource = empty;
+			};
 		}
 	}
 
 
-	public void UpdateListView ( string[] rawLines , string path )
+	public void UpdateListView ( string[] rawLines ) => _listView.itemsSource = ProcessRawLines( rawLines );
+	public void UpdateListView ( string path ) => UpdateListView( WriteSafeReadAllLines( path ) );
+
+
+	void WatchFile ( string path )
 	{
-		_listView.itemsSource = ProcessRawLines( rawLines );
+		if( _filePathWatcher!=null )
+			_filePathWatcher.Dispose();
+		
+		_filePathWatcher = new IO.FileSystemWatcher();
+		_filePathWatcher.Path = IO.Path.GetDirectoryName(path);
+		_filePathWatcher.Filter = IO.Path.GetFileName(path);
+		_filePathWatcher.NotifyFilter = IO.NotifyFilters.LastWrite;
+		_filePathWatcher.EnableRaisingEvents = true;
+		_filePathWatcher.Changed += (sender,e) => {
+			Debug.Log("file changed");
+			UpdateListView( path );
+		};
+
 		_filePathLabel.text = path;
+
 		History.Update( path );
-	}
-	public void UpdateListView ( string path )
-	{
-		string[] rawLines = WriteSafeReadAllLines( path );
-		_listView.itemsSource = ProcessRawLines( rawLines );
-		_filePathLabel.text = path;
-		History.Update( path );
+		_historyView.itemsSource = History.Read();
 	}
 
 
@@ -111,7 +124,7 @@ public class MainPanelController : MonoBehaviour
 		foreach( string argument in System.Environment.GetCommandLineArgs() )
 			debugMessages.Add( $"\t\"{argument}\"" );
 		rawLines = debugMessages.ToArray();
-		filePath = "N/A";
+		filePath = string.Empty;
 		return false;
 	}
 

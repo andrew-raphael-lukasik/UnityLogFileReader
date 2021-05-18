@@ -1,8 +1,13 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="main style.uss" />
-    <ui:Label text="(file path)" name="file_path" style="background-color: rgb(233, 233, 233); flex-grow: 0; font-size: 10px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(0, 0, 0, 255); border-right-color: rgba(0, 0, 0, 255); border-top-color: rgba(0, 0, 0, 255); border-bottom-color: rgba(0, 0, 0, 255);" />
-    <ui:Foldout text="file history&#10;" value="false" style="flex-shrink: 0; background-color: rgb(233, 233, 233); flex-grow: 0; font-size: 10px; border-left-width: 1px; border-right-width: 1px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgba(0, 0, 0, 255); border-right-color: rgba(0, 0, 0, 255); border-top-color: rgba(0, 0, 0, 255); border-bottom-color: rgba(0, 0, 0, 255);">
-        <HistoryListView style="flex-grow: 1; flex-shrink: 0;" />
-    </ui:Foldout>
+    <ui:Label text="(file path)" name="file_path" style="background-color: rgb(233, 233, 233); flex-grow: 0; font-size: 10px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0);" />
+    <ui:VisualElement style="flex-direction: row-reverse;">
+        <ui:VisualElement>
+            <ui:Button text="x" display-tooltip-when-elided="true" enable-rich-text="true" name="history_clear" tooltip="Clear file history." style="overflow: visible; background-color: rgb(233, 233, 233);" />
+        </ui:VisualElement>
+        <ui:Foldout text="file history&#10;" value="false" style="flex-shrink: 0; background-color: rgb(233, 233, 233); flex-grow: 1; font-size: 10px; border-left-width: 1px; border-right-width: 1px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0);">
+            <HistoryListView style="flex-grow: 1; flex-shrink: 0;" />
+        </ui:Foldout>
+    </ui:VisualElement>
     <EntryListView float-attr="0,1" double-attr="0,1" style="flex-grow: 5;" />
 </ui:UXML>
