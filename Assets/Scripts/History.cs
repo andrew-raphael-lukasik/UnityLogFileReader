@@ -28,6 +28,9 @@ public class History
 
 	public static void Write ( string[] array )
 	{
+		const int k_length_limit = 16;
+		if( array.Length>k_length_limit )
+			System.Array.Resize( ref array , k_length_limit );
 		string json = JsonUtility.ToJson( new HistoryData{ Values=array } );
 		PlayerPrefs.SetString( k_file_history_key , json );
 	}
