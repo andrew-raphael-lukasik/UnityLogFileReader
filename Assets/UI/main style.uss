@@ -64,4 +64,5 @@ Foldout {
 }
 
 Foldout Label {
+    font-size: 10px;
 }
