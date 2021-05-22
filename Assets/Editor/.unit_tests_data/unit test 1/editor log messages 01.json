@@ -1,0 +1,8 @@
+{
+    "entries": [
+        {
+            "text": "- Finished ILPostProcessorRunner in 0,06888 seconds\r\n[466/514  0s] ILPostProcess Library/Bee/artifacts/1900b0aPDevDbg.dag/post-processed/Unity.ProBuilder.KdTree.dll (+pdb)\r\n- Starting ILPostProcessorRunner",
+            "count": 1
+        }
+    ]
+}

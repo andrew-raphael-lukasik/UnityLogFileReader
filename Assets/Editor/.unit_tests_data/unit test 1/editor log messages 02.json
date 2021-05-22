@@ -1,0 +1,28 @@
+{
+    "entries": [
+        {
+            "text": "- Finished ILPostProcessor 'zzzUnity.Burst.CodeGen.BurstILPostProcessor' on UnityEngine.UIElementsInputSystemModule.dll in 0,000579 seconds",
+            "count": 1
+        },
+        {
+            "text": "- Finished ILPostProcessorRunner in 0,06888 seconds\r\n[466/514  0s] ILPostProcess Library/Bee/artifacts/1900b0aPDevDbg.dag/post-processed/Unity.ProBuilder.KdTree.dll (+pdb)\r\n- Starting ILPostProcessorRunner",
+            "count": 1
+        },
+        {
+            "text": "- Starting ILPostProcessor 'Unity.Properties.CodeGen.PostProcessor' on Unity.ProBuilder.KdTree.dll",
+            "count": 1
+        },
+        {
+            "text": "- Finished ILPostProcessor 'Unity.Properties.CodeGen.PostProcessor' on Unity.ProBuilder.KdTree.dll in 0,172432 seconds",
+            "count": 1
+        },
+        {
+            "text": "- Starting ILPostProcessor 'zzzUnity.Burst.CodeGen.BurstILPostProcessor' on Unity.ProBuilder.KdTree.dll",
+            "count": 1
+        },
+        {
+            "text": "- Finished ILPostProcessor 'zzzUnity.Burst.CodeGen.BurstILPostProcessor' on Unity.ProBuilder.KdTree.dll in 0,000574 seconds",
+            "count": 1
+        }
+    ]
+}
