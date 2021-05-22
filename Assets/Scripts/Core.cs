@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using IO = System.IO;
+using StringBuilder = System.Text.StringBuilder;
 
 public static class Core
 {
@@ -33,7 +34,7 @@ public static class Core
 	public static Entry[] ProcessRawLines ( string[] rawLines )
 	{
 		List<string> list = new List<string>();
-		var sb = new System.Text.StringBuilder();
+		var sb = new StringBuilder();
 		foreach( string line in rawLines )
 		{
 			if( !string.IsNullOrEmpty(line) )
@@ -45,12 +46,14 @@ public static class Core
 			}
 			else if( sb.Length!=0 )
 			{
+				RemoveLastLineEnding( sb );
 				list.Add( sb.ToString() );
 				sb.Clear();
 			}
 		}
 		if( sb.Length!=0 )
 		{
+			RemoveLastLineEnding( sb );
 			list.Add( sb.ToString() );
 			sb.Clear();
 		}
@@ -95,6 +98,13 @@ public static class Core
 				file.Add( sr.ReadLine() );
 			return file.ToArray();
 		}
+	}
+
+
+	static void RemoveLastLineEnding ( StringBuilder sb )
+	{
+		if( sb[sb.Length-1]=='\n' ) sb.Remove( sb.Length-1 , 1 );
+		if( sb[sb.Length-1]=='\r' ) sb.Remove( sb.Length-1 , 1 );
 	}
 
 
