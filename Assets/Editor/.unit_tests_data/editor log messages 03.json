@@ -9,7 +9,7 @@
             "count": 1
         },
         {
-            "text": "LICENSE SYSTEM [2021520 10:57:41] Current license is already valid and activated. Skipping license activation process (Provided username/password will be ignored).\r\nBuilt from '2021.1/staging' branch; Version is '2021.1.7f1 (d91830b65d9b) revision 14227504'; Using compiler version '192528614'; Build Type 'Release'\r\nOS: 'Windows 10 Pro; OS build 19042.985; Version 2009; 64bit' Language: 'en' Physical Memory: 24511 MB\r\n[Licensing::Module] Serial number assigned to: \"xxxxxxxx\"\r\nBatchMode: 0, IsHumanControllingUs: 1, StartBugReporterOnCrash: 1, Is64bit: 1, IsPro: 0\r\n[Package Manager] Server::Start -- Port 54836 was selected\r\n",
+            "text": "LICENSE SYSTEM [2021520 10:57:41] Current license is already valid and activated. Skipping license activation process (Provided username/password will be ignored).\r\nBuilt from '2021.1/staging' branch; Version is '2021.1.7f1 (d91830b65d9b) revision 14227504'; Using compiler version '192528614'; Build Type 'Release'\r\nOS: 'Windows 10 Pro; OS build 19042.985; Version 2009; 64bit' Language: 'en' Physical Memory: 24511 MB\r\n[Licensing::Module] Serial number assigned to: \"xxxxxxxx\"\r\nBatchMode: 0, IsHumanControllingUs: 1, StartBugReporterOnCrash: 1, Is64bit: 1, IsPro: 0\r\n[Package Manager] Server::Start -- Port 54836 was selected",
             "count": 1
         }
     ]

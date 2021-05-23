@@ -11,7 +11,7 @@ namespace Tests
 	{
 		[Test] public void TestFiles ()
 		{
-			string dir = IO.Path.Combine( Application.dataPath , "Editor/.unit_tests_data/unit test 1/" );
+			string dir = IO.Path.Combine( Application.dataPath , "Editor/.unit_tests_data/" );
 			if( !IO.Directory.Exists(dir) ) throw new System.Exception($"directory doesn't exists: {dir}");
 			Debug.Log($"running {nameof(TestFiles)}, directory: {dir}");
 

@@ -1,0 +1,8 @@
+{
+    "entries": [
+        {
+            "text": "Failed to create agent because it is not close enough to the NavMesh\r\nUnityEngine.AI.NavMesh:AddNavMeshDataTransformedInternal(NavMeshData, Vector3, Quaternion)\r\nUnityEngine.AI.NavMesh:AddNavMeshData(NavMeshData, Vector3, Quaternion)\r\nUnityEngine.AI.NavMeshSurface:AddData() (at D:\\_WORKSHOP\\!PROJECTS\\Non-Human_Society\\Library\\PackageCache\\com.unity.ai.navigation.components@0fc6f532e4\\Runtime\\NavMeshSurface.cs:159)\r\nUnityEngine.AI.NavMeshSurface:OnEnable() (at D:\\_WORKSHOP\\!PROJECTS\\Non-Human_Society\\Library\\PackageCache\\com.unity.ai.navigation.components@0fc6f532e4\\Runtime\\NavMeshSurface.cs:131)\r\n[C:\\buildslave\\unity\\build\\Modules/AI/Components/NavMeshAgent.cpp line 798878552]",
+            "count": 1
+        }
+    ]
+}
