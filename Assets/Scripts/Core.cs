@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 using IO = System.IO;
 using StringBuilder = System.Text.StringBuilder;
@@ -35,14 +34,16 @@ public static class Core
 	{
 		List<string> list = new List<string>();
 		var sb = new StringBuilder();
-		foreach( string line in rawLines )
+		for( int i=0 ; i<rawLines.Length ; i++ )
 		{
-			if( !string.IsNullOrEmpty(line) )
+			string line = rawLines[i];
+			bool isLineEmpty = string.IsNullOrEmpty(line);
+			if( !isLineEmpty )
 			{
-				if( line[0]!='[' )
+				if( !( line.StartsWith("(Filename:") || line.StartsWith("[C:") ) )
 					sb.AppendLine( line );
 				else if( list.Count!=0 )
-					list[list.Count-1] += line;
+					list[list.Count-1] = $"{list[list.Count-1]}\r\n{line}";
 			}
 			else if( sb.Length!=0 )
 			{
