@@ -30,7 +30,7 @@ public class EntryListView : VisualElement
 				LISTVIEW.itemsSource = _loremIpsum;
 				#endif
 				
-				LISTVIEW.itemHeight = 120;
+				LISTVIEW.fixedItemHeight = 120;
 				LISTVIEW.makeItem = () =>
 				{
 					VisualElement item = new VisualElement();
