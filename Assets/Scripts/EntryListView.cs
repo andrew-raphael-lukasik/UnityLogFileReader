@@ -5,6 +5,8 @@ using UnityEngine.UIElements;
 public class EntryListView : VisualElement
 {
 
+	const int k_display_text_length_limit = 3000;
+
 	ListView _listView;
 
 	public Entry[] itemsSource {
@@ -62,7 +64,14 @@ public class EntryListView : VisualElement
 						Color.RGBToHSV( TextToColor(entry.text) , out float h  , out float s , out float v );
 						style.backgroundColor = Color.HSVToRGB( h , 0.5f , 0.8f );
 					}
-					mainField.SetValueWithoutNotify( entry.text );
+					string text = entry.text;
+					if( text.Length>k_display_text_length_limit )
+					{
+						text = text.Substring( 0 , Mathf.Min(text.Length,k_display_text_length_limit) );
+						text += "\n\t----------- text trimmed for performance reasons, click to copy full text -----------";
+					}
+					mainField.SetValueWithoutNotify( text );
+
 					TextField repeatsField = (TextField) item[1];
 					if( entry.count!=1 )
 					{
