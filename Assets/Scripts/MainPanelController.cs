@@ -66,6 +66,9 @@ public class MainPanelController : MonoBehaviour
 				{
 					WatchFile( path );
 					UpdateListView( path );
+					Foldout foldout = _historyView.parent as Foldout;
+					if( foldout!=null ) foldout.value = false;
+					else Debug.LogWarning("parent Foldout not found");
 				};
 			}
 
