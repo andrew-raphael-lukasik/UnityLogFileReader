@@ -29,7 +29,8 @@ public class EntryListView : VisualElement
 				#endif
 				
 				LISTVIEW.itemHeight = 120;
-				LISTVIEW.makeItem = () => {
+				LISTVIEW.makeItem = () =>
+				{
 					VisualElement item = new VisualElement();
 						item.style.flexDirection = FlexDirection.RowReverse;
 					

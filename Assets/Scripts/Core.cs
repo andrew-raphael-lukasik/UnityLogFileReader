@@ -33,30 +33,30 @@ public static class Core
 	public static Entry[] ProcessRawLines ( string[] rawLines )
 	{
 		List<string> list = new List<string>();
-		var sb = new StringBuilder();
-		for( int i=0 ; i<rawLines.Length ; i++ )
 		{
-			string line = rawLines[i];
-			bool isLineEmpty = string.IsNullOrEmpty(line);
-			if( !isLineEmpty )
+			var buffer = new StringBuilder();
+			for( int i=0 ; i<rawLines.Length ; i++ )
 			{
-				if( !( line.StartsWith("(Filename:") || line.StartsWith("[C:") ) )
-					sb.AppendLine( line );
-				else if( list.Count!=0 )
-					list[list.Count-1] = $"{list[list.Count-1]}\r\n{line}";
+				string line = rawLines[i];
+				if( !string.IsNullOrEmpty(line) )
+				{
+					if( !( line.StartsWith("(Filename:") || line.StartsWith("[C:") ) )
+						buffer.AppendLine( line );
+					else if( list.Count!=0 )
+						list[list.Count-1] = $"{list[list.Count-1]}\r\n{line}";
+				}
+				else if( buffer.Length!=0 )
+				{
+					RemoveLastLineEnding( buffer );
+					list.Add( buffer.ToString() );
+					buffer.Clear();
+				}
 			}
-			else if( sb.Length!=0 )
+			if( buffer.Length!=0 )
 			{
-				RemoveLastLineEnding( sb );
-				list.Add( sb.ToString() );
-				sb.Clear();
+				RemoveLastLineEnding( buffer );
+				list.Add( buffer.ToString() );
 			}
-		}
-		if( sb.Length!=0 )
-		{
-			RemoveLastLineEnding( sb );
-			list.Add( sb.ToString() );
-			sb.Clear();
 		}
 		
 		List<Entry> entriesList = new List<Entry>( capacity:list.Count );
