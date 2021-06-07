@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 public class EntryListView : VisualElement
 {
 
-	const int k_display_text_length_limit = 3000;
+	const int k_display_text_length_limit = 1000;
 
 	ListView _listView;
 
