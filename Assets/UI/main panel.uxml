@@ -2,11 +2,9 @@
     <Style src="project://database/Assets/UI/main%20style.uss?fileID=7433441132597879392&amp;guid=1898ebe01529d6345bec27c887a21630&amp;type=3#main style" />
     <ui:TextField text="(file path)" name="file_path" readonly="true" style="background-color: rgb(233, 233, 233); flex-grow: 0; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); padding-right: 6px; padding-left: 6px; padding-top: 4px; padding-bottom: 4px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;" />
     <ui:VisualElement style="flex-direction: row-reverse;">
-        <ui:VisualElement>
-            <ui:Button text="clear" display-tooltip-when-elided="true" enable-rich-text="true" name="history_clear" tooltip="Clears list of recent files." style="overflow: visible; background-color: rgb(233, 233, 233); padding-left: 3px; padding-right: 3px; padding-top: 0; padding-bottom: 0; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-center; -unity-font-style: normal;" />
-        </ui:VisualElement>
         <ui:Foldout text="recent files&#10;" value="false" style="flex-shrink: 0; background-color: rgb(233, 233, 233); flex-grow: 1; border-left-width: 1px; border-right-width: 1px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); font-size: 10px;">
             <HistoryListView style="flex-grow: 1; flex-shrink: 0;" />
+            <ui:Button text="clear" display-tooltip-when-elided="true" enable-rich-text="true" name="history_clear" tooltip="Clears list of recent files." style="overflow: visible; background-color: rgb(233, 233, 233); padding-left: 3px; padding-right: 3px; padding-top: 0; padding-bottom: 0; margin-top: 1px; margin-bottom: 1px; -unity-text-align: middle-center; -unity-font-style: normal;" />
         </ui:Foldout>
     </ui:VisualElement>
     <EntryListView float-attr="0,1" double-attr="0,1" style="flex-grow: 5;" />
