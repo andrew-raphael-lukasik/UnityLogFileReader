@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,7 +8,7 @@ using IO = System.IO;
 public class MainPanelController : MonoBehaviour
 {
 	
-	EntryListView _listView = null;
+	EntryListView _entriesView = null;
 	HistoryListView _historyView = null;
 	Button _historyClear = null;
 	
@@ -53,7 +52,7 @@ public class MainPanelController : MonoBehaviour
 		if( rootVisualElement!=null )
 		{
 			// entry list view:
-			_listView = rootVisualElement.Q<EntryListView>();
+			_entriesView = rootVisualElement.Q<EntryListView>();
 
 			// file path label:
 			_filePathField = rootVisualElement.Q<TextField>( "file_path" );
@@ -83,7 +82,7 @@ public class MainPanelController : MonoBehaviour
 	}
 
 
-	public void UpdateListView ( string[] rawLines ) => _listView.itemsSource = Core.ProcessRawLines( rawLines );
+	public void UpdateListView ( string[] rawLines ) => _entriesView.itemsSource = Core.ProcessRawLines( rawLines );
 	public void UpdateListView ( string path ) => UpdateListView( Core.WriteSafeReadAllLines( path ) );
 
 
