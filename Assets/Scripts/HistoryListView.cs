@@ -4,6 +4,7 @@ using UnityEngine.UIElements;
 
 using IO = System.IO;
 
+[UnityEngine.Scripting.Preserve]
 public class HistoryListView : VisualElement
 {
 

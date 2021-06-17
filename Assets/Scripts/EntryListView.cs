@@ -2,6 +2,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[UnityEngine.Scripting.Preserve]
 public class EntryListView : VisualElement
 {
 
