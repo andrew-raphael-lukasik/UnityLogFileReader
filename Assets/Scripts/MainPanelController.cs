@@ -88,22 +88,28 @@ public class MainPanelController : MonoBehaviour
 
 	void WatchFile ( string path )
 	{
-		if( _filePathWatcher!=null )
-			_filePathWatcher.Dispose();
-		
-		_filePathWatcher = new IO.FileSystemWatcher();
-		_filePathWatcher.Path = IO.Path.GetDirectoryName(path);
-		_filePathWatcher.Filter = IO.Path.GetFileName(path);
-		_filePathWatcher.NotifyFilter = IO.NotifyFilters.LastWrite;
-		_filePathWatcher.EnableRaisingEvents = true;
-		_filePathWatcher.Changed += (sender,e) => {
-			UpdateListView( path );
-		};
-
-		_filePathField.SetValueWithoutNotify( path );
+		// this block started throwing
+		// "PlatformNotSupportedException: Operation is not supported on this platform."
+		// on standalone builds
+		try
+		{
+			if( _filePathWatcher!=null ) _filePathWatcher.Dispose();
+			_filePathWatcher = new IO.FileSystemWatcher();
+			_filePathWatcher.Path = IO.Path.GetDirectoryName(path);
+			_filePathWatcher.Filter = IO.Path.GetFileName(path);
+			_filePathWatcher.NotifyFilter = IO.NotifyFilters.LastWrite;
+			_filePathWatcher.EnableRaisingEvents = true;
+			_filePathWatcher.Changed += (sender,e) => UpdateListView(path);
+		}
+		catch( System.Exception ex )
+		{
+			Debug.LogException(ex);
+		}
 
 		History.Update( path );
 		_historyView.itemsSource = History.Read();
+
+		_filePathField.SetValueWithoutNotify( path );
 	}
 
 
