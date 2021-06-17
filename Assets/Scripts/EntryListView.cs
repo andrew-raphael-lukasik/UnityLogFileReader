@@ -12,7 +12,11 @@ public class EntryListView : VisualElement
 
 	public Entry[] itemsSource {
 		get => _listView.itemsSource as Entry[];
-		set => _listView.itemsSource = value;
+		set
+		{
+			_listView.itemsSource = value;
+			_listView.Rebuild();
+		}
 	}
 
 

@@ -12,7 +12,11 @@ public class HistoryListView : VisualElement
 
 	public string[] itemsSource {
 		get => _listView.itemsSource as string[];
-		set => _listView.itemsSource = value;
+		set
+		{
+			_listView.itemsSource = value;
+			_listView.Rebuild();
+		}
 	}
 
 
