@@ -6,7 +6,7 @@ using IO = System.IO;
 public class History
 {
 
-	public static string GetFilePath () => IO.Path.Combine( Application.persistentDataPath , "file_history.dat" );
+	public static string GetFilePath () => IO.Path.Combine( Application.persistentDataPath , "file_history.txt" );
 
 	public static void Update ( string path )
 	{
@@ -30,7 +30,7 @@ public class History
 	{
 		const int k_length_limit = 16;
 		if( array.Length>k_length_limit )
-			System.Array.Resize( ref array , k_length_limit );		
+			System.Array.Resize( ref array , k_length_limit );
 		IO.File.WriteAllLines( GetFilePath() , array );
 	}
 
