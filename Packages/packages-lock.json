@@ -27,7 +27,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.9",
+      "version": "2.0.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -146,14 +146,14 @@
       }
     },
     "com.unity.scriptablebuildpipeline": {
-      "version": "1.18.0",
+      "version": "1.19.1",
       "depth": 2,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.searcher": {
-      "version": "4.3.2",
+      "version": "4.8.0",
       "depth": 2,
       "source": "registry",
       "dependencies": {},
@@ -178,11 +178,11 @@
       "source": "builtin",
       "dependencies": {
         "com.unity.render-pipelines.core": "12.0.0",
-        "com.unity.searcher": "4.3.1"
+        "com.unity.searcher": "4.8.0"
       }
     },
     "com.unity.test-framework": {
-      "version": "1.1.26",
+      "version": "1.1.29",
       "depth": 1,
       "source": "registry",
       "dependencies": {
