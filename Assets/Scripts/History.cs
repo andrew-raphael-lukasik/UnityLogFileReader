@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using IO = System.IO;
+
 public class History
 {
 
-
-	public const string k_file_history_key = "file_history";
-
+	public static string GetFilePath () => IO.Path.Combine( Application.persistentDataPath , "file_history.txt" );
 
 	public static void Update ( string path )
 	{
@@ -22,8 +22,8 @@ public class History
 
 	public static string[] Read ()
 	{
-		string json = PlayerPrefs.GetString( k_file_history_key , JsonUtility.ToJson( new HistoryData{ Values=new string[0] } ) );
-		return JsonUtility.FromJson<HistoryData>(json).Values;
+		string filePath = GetFilePath();
+		return IO.File.Exists(filePath) ? IO.File.ReadAllLines(filePath) : new string[0];
 	}
 
 	public static void Write ( string[] array )
@@ -31,16 +31,7 @@ public class History
 		const int k_length_limit = 16;
 		if( array.Length>k_length_limit )
 			System.Array.Resize( ref array , k_length_limit );
-		string json = JsonUtility.ToJson( new HistoryData{ Values=array } );
-		PlayerPrefs.SetString( k_file_history_key , json );
+		IO.File.WriteAllLines( GetFilePath() , array );
 	}
-
-
-	[System.Serializable]
-	public struct HistoryData
-	{
-		public string[] Values;
-	}
-
 
 }

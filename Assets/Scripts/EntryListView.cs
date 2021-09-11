@@ -2,6 +2,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[UnityEngine.Scripting.Preserve]
 public class EntryListView : VisualElement
 {
 
@@ -11,7 +12,11 @@ public class EntryListView : VisualElement
 
 	public Entry[] itemsSource {
 		get => _listView.itemsSource as Entry[];
-		set => _listView.itemsSource = value;
+		set
+		{
+			_listView.itemsSource = value;
+			_listView.Rebuild();
+		}
 	}
 
 
@@ -30,7 +35,7 @@ public class EntryListView : VisualElement
 				LISTVIEW.itemsSource = _loremIpsum;
 				#endif
 				
-				LISTVIEW.itemHeight = 120;
+				LISTVIEW.fixedItemHeight = 120;
 				LISTVIEW.makeItem = () =>
 				{
 					VisualElement item = new VisualElement();

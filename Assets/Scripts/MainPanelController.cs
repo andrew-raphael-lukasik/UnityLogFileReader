@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,7 +8,7 @@ using IO = System.IO;
 public class MainPanelController : MonoBehaviour
 {
 	
-	EntryListView _listView = null;
+	EntryListView _entriesView = null;
 	HistoryListView _historyView = null;
 	Button _historyClear = null;
 	
@@ -53,7 +52,7 @@ public class MainPanelController : MonoBehaviour
 		if( rootVisualElement!=null )
 		{
 			// entry list view:
-			_listView = rootVisualElement.Q<EntryListView>();
+			_entriesView = rootVisualElement.Q<EntryListView>();
 
 			// file path label:
 			_filePathField = rootVisualElement.Q<TextField>( "file_path" );
@@ -66,6 +65,9 @@ public class MainPanelController : MonoBehaviour
 				{
 					WatchFile( path );
 					UpdateListView( path );
+					Foldout foldout = _historyView.parent as Foldout;
+					if( foldout!=null ) foldout.value = false;
+					else Debug.LogWarning("parent Foldout not found");
 				};
 			}
 
@@ -80,28 +82,34 @@ public class MainPanelController : MonoBehaviour
 	}
 
 
-	public void UpdateListView ( string[] rawLines ) => _listView.itemsSource = Core.ProcessRawLines( rawLines );
+	public void UpdateListView ( string[] rawLines ) => _entriesView.itemsSource = Core.ProcessRawLines( rawLines );
 	public void UpdateListView ( string path ) => UpdateListView( Core.WriteSafeReadAllLines( path ) );
 
 
 	void WatchFile ( string path )
 	{
-		if( _filePathWatcher!=null )
-			_filePathWatcher.Dispose();
-		
-		_filePathWatcher = new IO.FileSystemWatcher();
-		_filePathWatcher.Path = IO.Path.GetDirectoryName(path);
-		_filePathWatcher.Filter = IO.Path.GetFileName(path);
-		_filePathWatcher.NotifyFilter = IO.NotifyFilters.LastWrite;
-		_filePathWatcher.EnableRaisingEvents = true;
-		_filePathWatcher.Changed += (sender,e) => {
-			UpdateListView( path );
-		};
-
-		_filePathField.SetValueWithoutNotify( path );
+		// this block started throwing
+		// "PlatformNotSupportedException: Operation is not supported on this platform."
+		// on standalone builds
+		try
+		{
+			if( _filePathWatcher!=null ) _filePathWatcher.Dispose();
+			_filePathWatcher = new IO.FileSystemWatcher();
+			_filePathWatcher.Path = IO.Path.GetDirectoryName(path);
+			_filePathWatcher.Filter = IO.Path.GetFileName(path);
+			_filePathWatcher.NotifyFilter = IO.NotifyFilters.LastWrite;
+			_filePathWatcher.EnableRaisingEvents = true;
+			_filePathWatcher.Changed += (sender,e) => UpdateListView(path);
+		}
+		catch( System.Exception ex )
+		{
+			Debug.LogException(ex);
+		}
 
 		History.Update( path );
 		_historyView.itemsSource = History.Read();
+
+		_filePathField.SetValueWithoutNotify( path );
 	}
 
 

@@ -4,6 +4,7 @@ using UnityEngine.UIElements;
 
 using IO = System.IO;
 
+[UnityEngine.Scripting.Preserve]
 public class HistoryListView : VisualElement
 {
 
@@ -11,7 +12,11 @@ public class HistoryListView : VisualElement
 
 	public string[] itemsSource {
 		get => _listView.itemsSource as string[];
-		set => _listView.itemsSource = value;
+		set
+		{
+			_listView.itemsSource = value;
+			_listView.Rebuild();
+		}
 	}
 
 
@@ -33,7 +38,7 @@ public class HistoryListView : VisualElement
 			var LISTVIEW = new ListView();
 			LISTVIEW.style.flexGrow = 1;
 			{
-				LISTVIEW.itemHeight = 20;
+				LISTVIEW.fixedItemHeight = 20;
 				LISTVIEW.itemsSource = items;
 				LISTVIEW.makeItem = () => new Label();
 				LISTVIEW.bindItem = (item,i) =>
@@ -56,7 +61,7 @@ public class HistoryListView : VisualElement
 			ROOT._listView = LISTVIEW;
 			{
 				var style = ROOT.style;
-				style.minHeight = LISTVIEW.itemHeight * 4.5f;
+				style.minHeight = LISTVIEW.fixedItemHeight * 4.5f;
 			}
 		}
 
